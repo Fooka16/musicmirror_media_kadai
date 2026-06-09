@@ -291,15 +291,17 @@ function applyAudioLoopSetting(audio) {
 }
 
 function hideQuizComplete() {
-  elements.btnChooseA.removeAttribute("hidden");
-  elements.btnChooseB.removeAttribute("hidden");
-  elements.btnShowResult.setAttribute("hidden", "");
+  elements.btnChooseA.hidden = false;
+  elements.btnChooseB.hidden = false;
+  elements.btnShowResult.hidden = true;
+  elements.btnShowResult.classList.add("is-hidden");
 }
 
 function showQuizComplete() {
-  elements.btnChooseA.setAttribute("hidden", "");
-  elements.btnChooseB.setAttribute("hidden", "");
-  elements.btnShowResult.removeAttribute("hidden");
+  elements.btnChooseA.hidden = true;
+  elements.btnChooseB.hidden = true;
+  elements.btnShowResult.hidden = false;
+  elements.btnShowResult.classList.remove("is-hidden");
   elements.quizStep.textContent = `完了 / ${QUESTIONS.length}`;
   elements.progressFill.style.width = "100%";
   elements.progressBar.setAttribute("aria-valuenow", "100");

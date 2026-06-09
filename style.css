@@ -494,8 +494,11 @@ button {
   font-weight: 600;
 }
 
+.btn--show-result.is-hidden,
 .btn--show-result[hidden] {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .btn--show-result {
