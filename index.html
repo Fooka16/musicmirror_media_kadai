@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sonic Mirror — 音楽心理診断</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-bg" aria-hidden="true">
+    <div class="orb orb--1"></div>
+    <div class="orb orb--2"></div>
+    <div class="orb orb--3"></div>
+  </div>
+
+  <main class="app" id="app">
+    <!-- スタート画面 -->
+    <section class="screen screen--start is-active" id="screen-start" aria-labelledby="start-title">
+      <div class="card card--hero">
+        <p class="badge">Music Psychology Test</p>
+        <h1 class="title" id="start-title">Sonic Mirror</h1>
+        <p class="subtitle">音楽心理診断</p>
+        <p class="lead">
+          2つの音を聴き比べて、あなたが心地よいと感じる響きを選んでください。
+          6つの質問から、あなたの音楽嗜好タイプ（全16種）を診断します。
+        </p>
+        <button class="btn btn--primary" id="btn-start" type="button">
+          診断を始める
+        </button>
+      </div>
+    </section>
+
+    <!-- 質問画面 -->
+    <section class="screen screen--quiz" id="screen-quiz" aria-labelledby="quiz-title" hidden>
+      <header class="quiz-header">
+        <span class="quiz-step" id="quiz-step">Q1 / 6</span>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+          <div class="progress__fill" id="progress-fill"></div>
+        </div>
+      </header>
+
+      <div class="card card--quiz">
+        <h2 class="quiz-title" id="quiz-title"></h2>
+        <p class="quiz-desc" id="quiz-desc"></p>
+
+        <div class="audio-grid">
+          <!-- A音源カード -->
+          <article class="audio-card" id="audio-card-a">
+            <span class="audio-label">A</span>
+            <p class="audio-name" id="audio-name-a">音源 A</p>
+            <button class="btn btn--play" id="btn-play-a" type="button" aria-label="音源Aを再生">
+              <span class="btn__icon" aria-hidden="true">▶</span>
+              <span class="btn__text">再生</span>
+            </button>
+            <audio id="audio-a" preload="metadata"></audio>
+          </article>
+
+          <!-- B音源カード -->
+          <article class="audio-card" id="audio-card-b">
+            <span class="audio-label audio-label--b">B</span>
+            <p class="audio-name" id="audio-name-b">音源 B</p>
+            <button class="btn btn--play" id="btn-play-b" type="button" aria-label="音源Bを再生">
+              <span class="btn__icon" aria-hidden="true">▶</span>
+              <span class="btn__text">再生</span>
+            </button>
+            <audio id="audio-b" preload="metadata"></audio>
+          </article>
+        </div>
+
+        <div class="choice-row">
+          <button class="btn btn--choice btn--choice-a" id="btn-choose-a" type="button">A を選ぶ</button>
+          <button class="btn btn--choice btn--choice-b" id="btn-choose-b" type="button">B を選ぶ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 結果画面 -->
+    <section class="screen screen--result" id="screen-result" aria-labelledby="result-type" hidden>
+      <div class="card card--result">
+        <p class="result-label">あなたの音楽心理タイプ</p>
+        <p class="result-code" id="result-type" aria-live="polite"></p>
+        <h2 class="result-name" id="result-name"></h2>
+
+        <div class="result-block">
+          <h3 class="result-heading">音楽心理の特徴</h3>
+          <p class="result-text" id="result-traits"></p>
+        </div>
+
+        <div class="result-block">
+          <h3 class="result-heading">おすすめジャンル</h3>
+          <p class="result-text" id="result-genres"></p>
+        </div>
+
+        <div class="result-block">
+          <h3 class="result-heading">おすすめの聴き方</h3>
+          <p class="result-text" id="result-listening"></p>
+        </div>
+
+        <ul class="axis-list" id="axis-list" aria-label="診断軸の内訳"></ul>
+
+        <button class="btn btn--primary btn--retry" id="btn-retry" type="button">
+          もう一度診断する
+        </button>
+        <p class="credit">Audio: Kenney (CC0) — www.kenney.nl</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
