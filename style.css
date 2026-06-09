@@ -275,6 +275,7 @@ button {
 
 .btn--choice {
   flex: 1;
+  min-width: 0;
   padding: 16px 12px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
@@ -360,12 +361,13 @@ button {
 /* --- Audio Cards --- */
 .audio-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 }
 
 .audio-card {
+  min-width: 0;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -412,6 +414,7 @@ button {
 
 .choice-row {
   display: flex;
+  flex-wrap: nowrap;
   gap: 12px;
 }
 
@@ -472,7 +475,7 @@ button {
 .axis-list {
   list-style: none;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
   margin: 28px 0 24px;
   padding: 16px;
@@ -491,6 +494,15 @@ button {
   font-weight: 600;
 }
 
+.btn--show-result[hidden] {
+  display: none !important;
+}
+
+.btn--show-result {
+  width: 100%;
+  margin-top: 12px;
+}
+
 .btn--retry {
   margin-top: 8px;
 }
@@ -503,17 +515,8 @@ button {
 }
 
 /* --- Responsive --- */
-@media (max-width: 400px) {
-  .card {
-    padding: 24px 16px;
-  }
-
-  .audio-card {
-    padding: 16px 10px;
-  }
-
-  .btn--choice {
-    padding: 14px 8px;
-    font-size: 0.875rem;
+@media (max-width: 560px) {
+  html {
+    font-size: clamp(9px, 0.25rem + 2.8vw, 16px);
   }
 }

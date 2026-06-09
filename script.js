@@ -219,6 +219,8 @@ const elements = {
   btnPlayB: document.getElementById("btn-play-b"),
   btnChooseA: document.getElementById("btn-choose-a"),
   btnChooseB: document.getElementById("btn-choose-b"),
+  choiceRow: document.getElementById("choice-row"),
+  btnShowResult: document.getElementById("btn-show-result"),
   audioA: document.getElementById("audio-a"),
   audioB: document.getElementById("audio-b"),
   resultType: document.getElementById("result-type"),
@@ -251,6 +253,7 @@ function resetQuiz() {
   state.scores = { M: 0, A: 0, S: 0, U: 0, H: 0, L: 0, E: 0, D: 0 };
   state.isAnswering = false;
   state.answers = [];
+  hideQuizComplete();
   stopAllAudio();
 }
 
@@ -287,8 +290,26 @@ function applyAudioLoopSetting(audio) {
   );
 }
 
+function hideQuizComplete() {
+  elements.btnChooseA.removeAttribute("hidden");
+  elements.btnChooseB.removeAttribute("hidden");
+  elements.btnShowResult.setAttribute("hidden", "");
+}
+
+function showQuizComplete() {
+  elements.btnChooseA.setAttribute("hidden", "");
+  elements.btnChooseB.setAttribute("hidden", "");
+  elements.btnShowResult.removeAttribute("hidden");
+  elements.quizStep.textContent = `完了 / ${QUESTIONS.length}`;
+  elements.progressFill.style.width = "100%";
+  elements.progressBar.setAttribute("aria-valuenow", "100");
+}
+
 function renderQuestion() {
+  hideQuizComplete();
+
   const question = QUESTIONS[state.currentQuestionIndex];
+  if (!question) return;
 
   elements.quizTitle.textContent = question.title;
   elements.quizDesc.textContent = question.description;
@@ -395,33 +416,36 @@ function addScore(scoreMap) {
 }
 
 function handleAnswer(choice) {
-  // 診断完了後の再クリックでも結果画面へ遷移できるようにする
   if (state.currentQuestionIndex >= QUESTIONS.length) {
-    showResult();
+    showQuizComplete();
     return;
   }
   if (state.isAnswering) return;
 
   state.isAnswering = true;
 
-  const question = QUESTIONS[state.currentQuestionIndex];
-  const scoreMap = question.scores[choice];
+  try {
+    const question = QUESTIONS[state.currentQuestionIndex];
+    if (!question) return;
 
-  addScore(scoreMap);
-  state.answers.push(choice);
-  state.currentQuestionIndex += 1;
+    const scoreMap = question.scores[choice];
 
-  const finished = state.currentQuestionIndex >= QUESTIONS.length;
+    addScore(scoreMap);
+    state.answers.push(choice);
+    state.currentQuestionIndex += 1;
 
-  stopAllAudio();
+    const finished = state.currentQuestionIndex >= QUESTIONS.length;
 
-  if (finished) {
-    showResult();
-  } else {
-    renderQuestion();
+    stopAllAudio();
+
+    if (finished) {
+      showQuizComplete();
+    } else {
+      renderQuestion();
+    }
+  } finally {
+    state.isAnswering = false;
   }
-
-  state.isAnswering = false;
 }
 
 function goBack() {
@@ -431,6 +455,10 @@ function goBack() {
     resetQuiz();
     showScreen("start");
     return;
+  }
+
+  if (state.currentQuestionIndex >= QUESTIONS.length) {
+    hideQuizComplete();
   }
 
   state.currentQuestionIndex -= 1;
@@ -463,11 +491,8 @@ function calculateTypeCode() {
    結果表示
    ======================================== */
 function showResult() {
-  showScreen("result");
-
   const typeCode = calculateTypeCode();
-  const result = TYPE_RESULTS[typeCode];
-  if (!result) return;
+  const result = TYPE_RESULTS[typeCode] || TYPE_RESULTS.MSHE;
 
   elements.resultType.textContent = typeCode;
   elements.resultName.textContent = result.name;
@@ -476,6 +501,7 @@ function showResult() {
   elements.resultListening.textContent = result.listening;
 
   renderAxisBreakdown(typeCode);
+  showScreen("result");
 }
 
 function renderAxisBreakdown(typeCode) {
@@ -516,6 +542,7 @@ function bindEvents() {
 
   elements.btnChooseA.addEventListener("click", () => handleAnswer("A"));
   elements.btnChooseB.addEventListener("click", () => handleAnswer("B"));
+  elements.btnShowResult.addEventListener("click", showResult);
 }
 
 /* ========================================
@@ -524,6 +551,7 @@ function bindEvents() {
 function init() {
   bindEvents();
   setupAudioEvents();
+  hideQuizComplete();
   showScreen("start");
 }
 
