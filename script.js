@@ -189,6 +189,8 @@ const AXIS_LABELS = {
 const state = {
   currentQuestionIndex: 0,
   scores: { M: 0, A: 0, S: 0, U: 0, H: 0, L: 0, E: 0, D: 0 },
+  isAnswering: false,
+  answers: [],
 };
 
 /* ========================================
@@ -202,6 +204,7 @@ const screens = {
 
 const elements = {
   btnStart: document.getElementById("btn-start"),
+  btnBack: document.getElementById("btn-back"),
   btnRetry: document.getElementById("btn-retry"),
   quizStep: document.getElementById("quiz-step"),
   quizTitle: document.getElementById("quiz-title"),
@@ -232,11 +235,11 @@ const elements = {
 function showScreen(screenName) {
   Object.values(screens).forEach((screen) => {
     screen.classList.remove("is-active");
-    screen.hidden = true;
+    screen.setAttribute("hidden", "");
   });
 
   const target = screens[screenName];
-  target.hidden = false;
+  target.removeAttribute("hidden");
   target.classList.add("is-active");
 }
 
@@ -246,6 +249,8 @@ function showScreen(screenName) {
 function resetQuiz() {
   state.currentQuestionIndex = 0;
   state.scores = { M: 0, A: 0, S: 0, U: 0, H: 0, L: 0, E: 0, D: 0 };
+  state.isAnswering = false;
+  state.answers = [];
   stopAllAudio();
 }
 
@@ -304,12 +309,19 @@ function renderQuestion() {
 /* ========================================
    音声再生制御
    ======================================== */
-function stopAllAudio() {
-  [elements.audioA, elements.audioB].forEach((audio) => {
-    audio.pause();
-    audio.currentTime = 0;
-  });
+function resetAudioPosition(audio) {
+  audio.pause();
+  if (audio.readyState < 1) return;
 
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // メタデータ未読み込み時の seek エラーを無視
+  }
+}
+
+function stopAllAudio() {
+  [elements.audioA, elements.audioB].forEach(resetAudioPosition);
   resetPlayButtons();
 }
 
@@ -332,8 +344,7 @@ function togglePlay(side) {
   const targetCard = isA ? elements.audioCardA : elements.audioCardB;
 
   // もう一方の音源を停止
-  otherAudio.pause();
-  otherAudio.currentTime = 0;
+  resetAudioPosition(otherAudio);
   elements.btnPlayA.classList.remove("is-playing");
   elements.btnPlayB.classList.remove("is-playing");
   elements.audioCardA.classList.remove("is-active");
@@ -384,19 +395,54 @@ function addScore(scoreMap) {
 }
 
 function handleAnswer(choice) {
+  // 診断完了後の再クリックでも結果画面へ遷移できるようにする
+  if (state.currentQuestionIndex >= QUESTIONS.length) {
+    showResult();
+    return;
+  }
+  if (state.isAnswering) return;
+
+  state.isAnswering = true;
+
   const question = QUESTIONS[state.currentQuestionIndex];
   const scoreMap = question.scores[choice];
 
   addScore(scoreMap);
-  stopAllAudio();
-
+  state.answers.push(choice);
   state.currentQuestionIndex += 1;
 
-  if (state.currentQuestionIndex >= QUESTIONS.length) {
+  const finished = state.currentQuestionIndex >= QUESTIONS.length;
+
+  stopAllAudio();
+
+  if (finished) {
     showResult();
   } else {
     renderQuestion();
   }
+
+  state.isAnswering = false;
+}
+
+function goBack() {
+  if (state.isAnswering) return;
+
+  if (state.currentQuestionIndex === 0) {
+    resetQuiz();
+    showScreen("start");
+    return;
+  }
+
+  state.currentQuestionIndex -= 1;
+  const lastChoice = state.answers.pop();
+  const scoreMap = QUESTIONS[state.currentQuestionIndex].scores[lastChoice];
+
+  Object.entries(scoreMap).forEach(([key, value]) => {
+    state.scores[key] -= value;
+  });
+
+  stopAllAudio();
+  renderQuestion();
 }
 
 /* ========================================
@@ -417,8 +463,11 @@ function calculateTypeCode() {
    結果表示
    ======================================== */
 function showResult() {
+  showScreen("result");
+
   const typeCode = calculateTypeCode();
   const result = TYPE_RESULTS[typeCode];
+  if (!result) return;
 
   elements.resultType.textContent = typeCode;
   elements.resultName.textContent = result.name;
@@ -427,7 +476,6 @@ function showResult() {
   elements.resultListening.textContent = result.listening;
 
   renderAxisBreakdown(typeCode);
-  showScreen("result");
 }
 
 function renderAxisBreakdown(typeCode) {
@@ -460,6 +508,8 @@ function bindEvents() {
     resetQuiz();
     showScreen("start");
   });
+
+  elements.btnBack.addEventListener("click", goBack);
 
   elements.btnPlayA.addEventListener("click", () => togglePlay("A"));
   elements.btnPlayB.addEventListener("click", () => togglePlay("B"));

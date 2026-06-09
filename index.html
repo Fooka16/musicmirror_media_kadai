@@ -33,7 +33,10 @@
     <!-- 質問画面 -->
     <section class="screen screen--quiz" id="screen-quiz" aria-labelledby="quiz-title" hidden>
       <header class="quiz-header">
-        <span class="quiz-step" id="quiz-step">Q1 / 6</span>
+        <div class="quiz-header__top">
+          <button class="btn btn--back" id="btn-back" type="button">戻る</button>
+          <span class="quiz-step" id="quiz-step">Q1 / 6</span>
+        </div>
         <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
           <div class="progress__fill" id="progress-fill"></div>
         </div>
